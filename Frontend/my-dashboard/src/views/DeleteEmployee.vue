@@ -52,30 +52,40 @@
 
 
 <script setup>
-// delete employee by api
 import { ref } from 'vue'
-import api from '@/services/api'
+import { searchEmployeeApi, deleteEmployeeApi } from '@/services/employees'
 
 const searchName = ref('')
 const employee = ref(null)
 const searched = ref(false)
 
 const searchEmployee = async () => {
-  const { data } = await api.get('/employees', { params: { name: searchName.value } })
-  employee.value = data.length ? data[0] : null
-  searched.value = true
+  try {
+    const data = await searchEmployeeApi(searchName.value)
+    employee.value = data.length ? data[0] : null
+    searched.value = true
+  } catch (err) {
+    console.error('Search failed:', err)
+    alert('Error searching employee')
+  }
 }
 
 const deleteEmployee = async () => {
   if (employee.value) {
-    await api.delete(`/employees/${employee.value.id}`)
-    employee.value = null
-    searchName.value = ''
-    searched.value = false
-    alert('the employee moved to trash')
+    try {
+      await deleteEmployeeApi(employee.value.id)
+      employee.value = null
+      searchName.value = ''
+      searched.value = false
+      alert('The employee moved to trash')
+    } catch (err) {
+      console.error('Delete failed:', err)
+      alert('Error while deleting employee')
+    }
   }
 }
 </script>
+
 
 <style scoped>
 input {

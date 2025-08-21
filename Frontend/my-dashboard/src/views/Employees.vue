@@ -18,19 +18,19 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(emp, index) in employees" :key="index" class="hover:bg-gray-50">
-            <td class="border px-4 py-2">{{ index + 1 }}</td>
+          <tr v-for="emp in employees" :key="emp.id" class="hover:bg-gray-50">
+            <td class="border px-4 py-2">{{ emp.id }}</td>
             <td class="border px-4 py-2">{{ emp.name }}</td>
             <td class="border px-4 py-2">{{ emp.department }}</td>
-            <td class="border px-4 py-2">{{ emp.baseSalary }}</td>
+            <td class="border px-4 py-2">{{ emp.base_salary }}</td>
             <td class="border px-4 py-2">{{ emp.bonus }}</td>
             <td class="border px-4 py-2">{{ emp.deductions }}</td>
             <td class="border px-4 py-2 font-medium text-green-600">
-              {{ emp.baseSalary + emp.bonus - emp.deductions }}
+              {{ emp.base_salary + emp.bonus - emp.deductions }}
             </td>
             <td class="border px-4 py-2 text-center">
               <button 
-                @click="showDetails(emp, index)" 
+                @click="showDetails(emp)" 
                 class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded"
               >
                 View Details
@@ -62,7 +62,7 @@
 
         <div>
           <label class="block mb-1">Phone Number:</label>
-          <input v-model="selectedEmployee.phoneNumber" type="text" class="w-full border px-3 py-2 rounded" />
+          <input v-model="selectedEmployee.phone_number" type="text" class="w-full border px-3 py-2 rounded" />
         </div>
 
         <div>
@@ -76,8 +76,8 @@
         </div>
 
         <div>
-          <label class="block mb-1">Basic Salary:</label>
-          <input v-model.number="selectedEmployee.baseSalary" type="number" class="w-full border px-3 py-2 rounded" />
+          <label class="block mb-1">Base Salary:</label>
+          <input v-model.number="selectedEmployee.base_salary" type="number" class="w-full border px-3 py-2 rounded" />
         </div>
 
         <div>
@@ -114,29 +114,72 @@
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted } from 'vue';
-import { fetchEmployees } from '@/services/employees';
+import { ref, onMounted } from "vue";
+import { fetchEmployees, updateEmployeeApi, uploadContractApi } from "@/services/employees";
 
 const employees = ref([]);
-const loading = ref(false);
-const error = ref('');
+const selectedEmployee = ref(null);
+const viewingDetails = ref(false);
+const contractFile = ref(null);
 
+// Load all employees
 async function load() {
-  loading.value = true;
-  error.value = '';
   try {
-    employees.value = await fetchEmployees();
+    const data = await fetchEmployees();
+    employees.value = data;
   } catch (e) {
-    error.value = e.message;
-  } finally {
-    loading.value = false;
+    console.error("Error fetching employees:", e);
   }
+}
+
+// Show employee details
+function showDetails(emp) {
+  selectedEmployee.value = { ...emp };
+  viewingDetails.value = true;
+}
+
+// Back to employee list
+function backToList() {
+  selectedEmployee.value = null;
+  viewingDetails.value = false;
+}
+
+// Update employee
+async function updateEmployee() {
+  try {
+    await updateEmployeeApi(selectedEmployee.value.id, selectedEmployee.value);
+    alert("Employee updated successfully!");
+    backToList();
+    load();
+  } catch (e) {
+    alert("Error updating employee: " + e.message);
+  }
+}
+
+// Handle contract upload
+function handleContractUpload(event) {
+  contractFile.value = event.target.files[0];
+  if (!contractFile.value) return;
+
+  const formData = new FormData();
+  formData.append("contract", contractFile.value);
+  formData.append("employee_id", selectedEmployee.value.id);
+
+  uploadContractApi(formData, (progress) => {
+    console.log("Upload progress:", progress + "%");
+  })
+    .then(() => {
+      alert("Contract uploaded successfully!");
+    })
+    .catch((err) => {
+      alert("Error uploading contract: " + err.message);
+    });
 }
 
 onMounted(load);
 </script>
+
 
 
 <!-- <script setup>

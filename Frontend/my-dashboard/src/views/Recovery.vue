@@ -7,7 +7,7 @@
     <div v-if="trashList.length > 0" class="space-y-4">
       <div class="flex justify-end">
         <button 
-          @click="emptyTrash"
+          @click="handleEmptyTrash"
           class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded shadow"
         >
           Empty Trash
@@ -16,7 +16,7 @@
 
       <div 
         v-for="(emp, index) in trashList" 
-        :key="index" 
+        :key="emp.id" 
         class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-orange-400 flex flex-col sm:flex-row justify-between items-start sm:items-center"
       >
         <div class="space-y-1">
@@ -30,14 +30,14 @@
 
         <div class="mt-3 sm:mt-0 flex gap-3">
           <button 
-            @click="restoreEmployee(index)"
+            @click="handleRestore(emp, index)"
             class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded shadow"
           >
             Restore
           </button>
 
           <button 
-            @click="deletePermanently(index)"
+            @click="handleDeletePermanently(emp, index)"
             class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow"
           >
             Delete Permanently
@@ -52,46 +52,57 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue'
-import api from '@/services/api'
+import { fetchTrash, restoreEmployee, deletePermanently, emptyTrash } from '@/services/trash'
 
 const trashList = ref([])
 
 const loadTrash = async () => {
-  trashList.value = await api.get('/trash-employees')
-}
-
-const restoreEmployee = async (index) => {
-  const employee = trashList.value[index]
-
-  await api.post('/employees', employee)
-  trashList.value.splice(index, 1)
-  alert('The employee has been restored.')
-}
-
-const deletePermanently = async (index) => {
-  if (confirm('Are you sure you want to delete the employee permanently? ')) {
-    await api.delete(`/trash-employees/${trashList.value[index].id}`)
-    trashList.value.splice(index, 1)
-    alert('Deleted is Done ! ')
+  try {
+    trashList.value = await fetchTrash()
+  } catch (err) {
+    console.error('Error loading trash:', err)
   }
 }
 
-const emptyTrash = async () => {
-  if (confirm('Do you want to empty the basket completely?')) {
+const handleRestore = async (employee, index) => {
+  try {
+    await restoreEmployee(employee)
+    trashList.value.splice(index, 1)
+    alert('Employee has been restored.')
+  } catch (err) {
+    alert('Error restoring employee: ' + err.message)
+  }
+}
+
+const handleDeletePermanently = async (employee, index) => {
+  if (!confirm('Are you sure you want to delete the employee permanently?')) return
+  try {
+    await deletePermanently(employee.id)
+    trashList.value.splice(index, 1)
+    alert('Employee deleted permanently.')
+  } catch (err) {
+    alert('Error deleting employee: ' + err.message)
+  }
+}
+
+const handleEmptyTrash = async () => {
+  if (!confirm('Do you want to empty the trash completely?')) return
+  try {
+    await emptyTrash()
     trashList.value = []
-    localStorage.removeItem('trashEmployees')
-    alert('The trash has been emptied.')
+    alert('Trash emptied successfully.')
+  } catch (err) {
+    alert('Error emptying trash: ' + err.message)
   }
 }
 
 onMounted(() => {
   loadTrash()
 })
-
 </script>
+
 
 <style scoped>
 h2 {

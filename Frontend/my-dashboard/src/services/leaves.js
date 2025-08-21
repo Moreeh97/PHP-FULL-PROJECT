@@ -1,20 +1,61 @@
-import api from './api';
+// services/leaves.js
+import api from './api'
 
-export async function fetchLeaves(employeeId) {
-  const { data } = await api.get('/leaves', { params: { employee_id: employeeId } });
-  return data;
+/**
+ * Fetch all leaves
+ * @returns {Promise<Array>}
+ */
+export const fetchLeaves = async () => {
+  try {
+    const response = await api.get('/leaves')
+    return response.data
+  } catch (err) {
+    console.error('Error fetching leaves:', err)
+    throw err
+  }
 }
 
-export async function createLeave({ employee_id, from_date, to_date, reason }) {
-  const { data } = await api.post('/leaves', { employee_id, from_date, to_date, reason });
-  return data.leave;
+/**
+ * Add a new leave
+ * @param {Object} leaveData
+ * @returns {Promise<Object>}
+ */
+export const addLeave = async (leaveData) => {
+  try {
+    const response = await api.post('/leaves', leaveData)
+    return response.data
+  } catch (err) {
+    console.error('Error adding leave:', err)
+    throw err
+  }
 }
 
-export async function deleteLeave(id) {
-  await api.delete(`/leaves/${id}`);
+/**
+ * Update a leave by ID
+ * @param {number|string} id
+ * @param {Object} leaveData
+ * @returns {Promise<Object>}
+ */
+export const updateLeave = async (id, leaveData) => {
+  try {
+    const response = await api.put(`/leaves/${id}`, leaveData)
+    return response.data
+  } catch (err) {
+    console.error('Error updating leave:', err)
+    throw err
+  }
 }
 
-export async function setLeaveStatus(id, status) {
-  const { data } = await api.patch(`/leaves/${id}/status`, { status });
-  return data;
+/**
+ * Delete a leave by ID
+ * @param {number|string} id
+ * @returns {Promise<void>}
+ */
+export const deleteLeave = async (id) => {
+  try {
+    await api.delete(`/leaves/${id}`)
+  } catch (err) {
+    console.error('Error deleting leave:', err)
+    throw err
+  }
 }

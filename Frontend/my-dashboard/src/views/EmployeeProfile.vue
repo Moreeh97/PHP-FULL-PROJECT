@@ -27,9 +27,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-gray-700">
         <p><strong>Name:</strong> {{ employee.name }}</p>
         <p><strong>Department:</strong> {{ employee.department }}</p>
-        <p><strong>Base Salary:</strong> {{ employee.baseSalary }}</p>
+        <p><strong>Base Salary:</strong> {{ employee.base_salary }}</p>
         <p><strong>Bonus:</strong> {{ employee.bonus }}</p>
         <p><strong>Deductions:</strong> {{ employee.deductions }}</p>
+        <p><strong>Email:</strong> {{ employee.email }}</p>
+        <p><strong>Phone:</strong> {{ employee.phone_number }}</p>
+        <p><strong>Education:</strong> {{ employee.education }}</p>
       </div>
     </div>
 
@@ -41,36 +44,27 @@
 </template>
 
 
+
 <script setup>
 import { ref } from 'vue'
-import api from '@/services/api'
+import { searchEmployeeApi } from '@/services/employees'
 
 const searchName = ref('')
 const employee = ref(null)
 const searched = ref(false)
 
 const searchEmployee = async () => {
-  const { data } = await api.get('/employees', { params: { name: searchName.value } })
-  employee.value = data.length ? data[0] : null
-  searched.value = true
-}
-
-//show employee profile
-const showEmployeeProfile = () => {
-  if (employee.value) {
-    alert(`Employee Profile:
-    Name: ${employee.value.name}
-    Department: ${employee.value.department}
-    Base Salary: ${employee.value.baseSalary}
-    Bonus: ${employee.value.bonus}
-    Deductions: ${employee.value.deductions}
-    Email: ${employee.value.email}
-    Phone: ${employee.value.phoneNumber}
-    `);
+  try {
+    const data = await searchEmployeeApi(searchName.value)
+    employee.value = data.length ? data[0] : null
+    searched.value = true
+  } catch (err) {
+    console.error('Search failed:', err)
+    alert('Error searching employee')
   }
 }
-
 </script>
+
 
 <style scoped>
 input {

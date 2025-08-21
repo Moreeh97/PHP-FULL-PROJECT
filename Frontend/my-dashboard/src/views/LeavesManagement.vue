@@ -6,32 +6,37 @@
     <div class="bg-white shadow rounded-lg p-6">
       <h3 class="text-lg font-semibold mb-4">Request Leave</h3>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Employee selection -->
         <div>
           <label class="block text-sm mb-1">Select Employee:</label>
           <select v-model="leaveRequest.name" class="w-full border p-2 rounded">
             <option value="" disabled>Select employee</option>
-            <option v-for="emp in employees" :key="emp.name" :value="emp.name">
+            <option v-for="emp in employees" :key="emp.id" :value="emp.name">
               {{ emp.name }}
             </option>
           </select>
         </div>
 
+        <!-- From Date -->
         <div>
           <label class="block text-sm mb-1">From Date:</label>
           <input type="date" v-model="leaveRequest.from" class="w-full border p-2 rounded" />
         </div>
 
+        <!-- To Date -->
         <div>
           <label class="block text-sm mb-1">To Date:</label>
           <input type="date" v-model="leaveRequest.to" class="w-full border p-2 rounded" />
         </div>
 
+        <!-- Reason -->
         <div class="sm:col-span-2">
           <label class="block text-sm mb-1">Reason:</label>
           <textarea v-model="leaveRequest.reason" rows="3" class="w-full border p-2 rounded"></textarea>
         </div>
       </div>
 
+      <!-- Submit button -->
       <div class="mt-4 flex justify-end">
         <button 
           @click="submitLeave"
@@ -53,14 +58,14 @@
       />
     </div>
 
-    <!-- Leave Requests -->
+    <!-- Leave Requests List -->
     <div class="bg-white shadow rounded-lg p-6">
       <h3 class="text-lg font-semibold mb-4">Leave Requests</h3>
 
       <div v-if="filteredLeaves.length > 0" class="grid gap-4">
         <div 
           v-for="(leave, index) in filteredLeaves" 
-          :key="index" 
+          :key="leave.id" 
           class="border rounded-lg p-4 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center"
         >
           <div class="space-y-1">
@@ -70,7 +75,7 @@
           </div>
 
           <button 
-            @click="deleteLeave(index)"
+            @click="deleteLeave(leave.id, index)"
             class="mt-3 sm:mt-0 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm shadow"
           >
             Delete
@@ -82,7 +87,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
@@ -98,29 +102,52 @@ const leaveRequest = ref({
 })
 const filterName = ref('')
 
+// Load employees and leave requests on mount
 onMounted(async () => {
-  employees.value = await api.get('/employees')
-  leaves.value = await api.get('/leaves')
+  try {
+    const employeesRes = await api.get('/employees')
+    employees.value = employeesRes.data || []
+
+    const leavesRes = await api.get('/leaves')
+    leaves.value = leavesRes.data || []
+  } catch (err) {
+    console.error('Error fetching data:', err)
+  }
 })
 
+// Submit a new leave request
 const submitLeave = async () => {
   if (!leaveRequest.value.name || !leaveRequest.value.from || !leaveRequest.value.to || !leaveRequest.value.reason) {
     alert('Please fill all fields.')
     return
   }
 
-  await api.post('/leaves', leaveRequest.value)
-  leaves.value.push({ ...leaveRequest.value })
-  leaveRequest.value = { name: '', from: '', to: '', reason: '' }
-}
-
-const deleteLeave = async (index) => {
-  if (confirm('Are you sure you want to delete this leave request?')) {
-    await api.delete(`/leaves/${leaves.value[index].id}`)
-    leaves.value.splice(index, 1)
+  try {
+    const res = await api.post('/leaves', leaveRequest.value)
+    leaves.value.push(res.data) // Add new leave to list
+    leaveRequest.value = { name: '', from: '', to: '', reason: '' }
+    alert('Leave request submitted successfully!')
+  } catch (err) {
+    console.error(err)
+    alert('Error submitting leave request.')
   }
 }
 
+// Delete leave request
+const deleteLeave = async (id, index) => {
+  if (confirm('Are you sure you want to delete this leave request?')) {
+    try {
+      await api.delete(`/leaves/${id}`)
+      leaves.value.splice(index, 1)
+      alert('Leave request deleted.')
+    } catch (err) {
+      console.error(err)
+      alert('Error deleting leave request.')
+    }
+  }
+}
+
+// Computed filtered leaves
 const filteredLeaves = computed(() => {
   if (!filterName.value.trim()) return leaves.value
   return leaves.value.filter(l => l.name.toLowerCase().includes(filterName.value.toLowerCase()))

@@ -29,30 +29,45 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 
 const employees = ref([])
-const totalBaseSalary = ref(0)
-const totalBonus = ref(0)
-const totalDeductions = ref(0)
-const totalNetSalary = ref(0)
 
 onMounted(async () => {
-  employees.value = await api.get('/employees')
+  try {
+    employees.value = await api.get('/employees')
+  } catch (err) {
+    console.error('Error fetching employees:', err)
+  }
+})
 
-  totalBaseSalary.value = employees.value.reduce((sum, emp) => sum + Number(emp.baseSalary || 0), 0)
-  totalBonus.value = employees.value.reduce((sum, emp) => sum + Number(emp.bonus || 0), 0)
-  totalDeductions.value = employees.value.reduce((sum, emp) => sum + Number(emp.deductions || 0), 0)
-  totalNetSalary.value = employees.value.reduce((sum, emp) => {
+// Computed properties for dynamic calculation
+const totalBaseSalary = computed(() => 
+  employees.value.reduce((sum, emp) => sum + Number(emp.baseSalary || 0), 0)
+)
+
+const totalBonus = computed(() => 
+  employees.value.reduce((sum, emp) => sum + Number(emp.bonus || 0), 0)
+)
+
+const totalDeductions = computed(() => 
+  employees.value.reduce((sum, emp) => sum + Number(emp.deductions || 0), 0)
+)
+
+const totalNetSalary = computed(() =>
+  employees.value.reduce((sum, emp) => {
     const base = Number(emp.baseSalary || 0)
     const bonus = Number(emp.bonus || 0)
     const deductions = Number(emp.deductions || 0)
     return sum + (base + bonus - deductions)
   }, 0)
-})
+)
 </script>
 
-
+<style scoped>
+h2 {
+  margin-bottom: 20px;
+}
+</style>

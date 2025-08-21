@@ -85,42 +85,51 @@
 
 
 <script setup>
-import api from '@/services/api'
-import { ref } from 'vue'
+import { ref } from "vue";
+import { addEmployeeApi } from "@/services/employees";
 
 const employee = ref({
-  name: '',
-  email: '',
-  phone_number: '',
-  education: '',
-  department: '',
+  name: "",
+  email: "",
+  phone_number: "",
+  education: "",
+  department: "",
   base_salary: 0,
   bonus: 0,
   deductions: 0,
-  note: '',
-  date: '',
-  contract: null
-})
+  note: "",
+  date: "",
+  contract: null,
+});
 
 const handleFileUpload = (event) => {
-  employee.value.contract = event.target.files[0]
-}
+  employee.value.contract = event.target.files[0];
+};
 
 const addEmployee = async () => {
   try {
-    const formData = new FormData()
+    const formData = new FormData();
     for (const key in employee.value) {
-      formData.append(key, employee.value[key])
+      formData.append(key, employee.value[key]);
     }
 
-    await api.addEmployee(formData) 
-    alert('Employee added successfully!')
+    await addEmployeeApi(formData);
+    alert("Employee added successfully!");
+
+    // Reset form
+    for (const key in employee.value) {
+      employee.value[key] = key === "contract" ? null : "";
+    }
+    employee.value.base_salary = 0;
+    employee.value.bonus = 0;
+    employee.value.deductions = 0;
   } catch (err) {
-    console.error('Saving failed:', err)
-    alert('Error while saving employee')
+    console.error("Saving failed:", err);
+    alert("Error while saving employee");
   }
-}
+};
 </script>
+
 
 
 <!-- <script setup>
