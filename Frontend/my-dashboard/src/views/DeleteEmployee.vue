@@ -52,44 +52,28 @@
 
 
 <script setup>
+// delete employee by api
 import { ref } from 'vue'
-
+import api from '@/services/api'
 
 const searchName = ref('')
 const employee = ref(null)
 const searched = ref(false)
 
-const searchEmployee = () => {
-  const employees = JSON.parse(localStorage.getItem('employees') || '[]')
-  const found = employees.find(emp =>
-    emp.name.trim().toLowerCase() === searchName.value.trim().toLowerCase()
-  )
-
-  if (found) {
-    employee.value = found
-  } else {
-    employee.value = null
-  }
-
+const searchEmployee = async () => {
+  const { data } = await api.get('/employees', { params: { name: searchName.value } })
+  employee.value = data.length ? data[0] : null
   searched.value = true
 }
 
-const deleteEmployee = () => {
-  const employees = JSON.parse(localStorage.getItem('employees') || '[]')
-  const updatedEmployees = employees.filter(emp =>
-    emp.name.trim().toLowerCase() !== employee.value.name.trim().toLowerCase()
-  )
-  localStorage.setItem('employees', JSON.stringify(updatedEmployees))
-
-  const trash = JSON.parse(localStorage.getItem('trashEmployees') || '[]')
-  trash.push(employee.value)
-  localStorage.setItem('trashEmployees', JSON.stringify(trash))
-
-  employee.value = null
-  searchName.value = ''
-  searched.value = false
-
-  alert('the employee moved to trash')
+const deleteEmployee = async () => {
+  if (employee.value) {
+    await api.delete(`/employees/${employee.value.id}`)
+    employee.value = null
+    searchName.value = ''
+    searched.value = false
+    alert('the employee moved to trash')
+  }
 }
 </script>
 

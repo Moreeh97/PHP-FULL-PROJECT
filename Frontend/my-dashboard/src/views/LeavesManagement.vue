@@ -86,53 +86,41 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import api from '@/services/api'
 
-// Employees from localStorage
 const employees = ref([])
-
-// All leave requests
 const leaves = ref([])
-
-// Form data
 const leaveRequest = ref({
   name: '',
   from: '',
   to: '',
   reason: ''
 })
-
-// Filter text
 const filterName = ref('')
 
-// Load data on mount
-onMounted(() => {
-  employees.value = JSON.parse(localStorage.getItem('employees') || '[]')
-  leaves.value = JSON.parse(localStorage.getItem('leaves') || '[]')
+onMounted(async () => {
+  employees.value = await api.get('/employees')
+  leaves.value = await api.get('/leaves')
 })
 
-// Submit leave
-const submitLeave = () => {
+const submitLeave = async () => {
   if (!leaveRequest.value.name || !leaveRequest.value.from || !leaveRequest.value.to || !leaveRequest.value.reason) {
     alert('Please fill all fields.')
     return
   }
 
+  await api.post('/leaves', leaveRequest.value)
   leaves.value.push({ ...leaveRequest.value })
-  localStorage.setItem('leaves', JSON.stringify(leaves.value))
-
-  // Reset form
   leaveRequest.value = { name: '', from: '', to: '', reason: '' }
 }
 
-// Delete leave
-const deleteLeave = (index) => {
+const deleteLeave = async (index) => {
   if (confirm('Are you sure you want to delete this leave request?')) {
+    await api.delete(`/leaves/${leaves.value[index].id}`)
     leaves.value.splice(index, 1)
-    localStorage.setItem('leaves', JSON.stringify(leaves.value))
   }
 }
 
-// Filtered leaves
 const filteredLeaves = computed(() => {
   if (!filterName.value.trim()) return leaves.value
   return leaves.value.filter(l => l.name.toLowerCase().includes(filterName.value.toLowerCase()))

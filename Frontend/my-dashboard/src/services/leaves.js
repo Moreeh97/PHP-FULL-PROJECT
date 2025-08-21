@@ -1,6 +1,5 @@
 import api from './api';
 
-// جلب الإجازات (اختياري employee_id)
 export async function fetchLeaves(employeeId) {
   const { data } = await api.get('/leaves', { params: { employee_id: employeeId } });
   return data;

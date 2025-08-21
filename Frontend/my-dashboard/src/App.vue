@@ -45,6 +45,10 @@ import { ref, onMounted } from 'vue'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter()
 
 const showSidebar = ref(false)
 const isMobile = ref(false)

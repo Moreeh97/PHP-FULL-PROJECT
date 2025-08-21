@@ -55,35 +55,31 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import api from '@/services/api'
 
 const trashList = ref([])
 
-const loadTrash = () => {
-  trashList.value = JSON.parse(localStorage.getItem('trashEmployees') || '[]')
+const loadTrash = async () => {
+  trashList.value = await api.get('/trash-employees')
 }
 
-const restoreEmployee = (index) => {
+const restoreEmployee = async (index) => {
   const employee = trashList.value[index]
 
-  const employees = JSON.parse(localStorage.getItem('employees') || '[]')
-  employees.push(employee)
-  localStorage.setItem('employees', JSON.stringify(employees))
-
+  await api.post('/employees', employee)
   trashList.value.splice(index, 1)
-  localStorage.setItem('trashEmployees', JSON.stringify(trashList.value))
-
-  alert(' The employee recovered done  ')
+  alert('The employee has been restored.')
 }
 
-const deletePermanently = (index) => {
+const deletePermanently = async (index) => {
   if (confirm('Are you sure you want to delete the employee permanently? ')) {
+    await api.delete(`/trash-employees/${trashList.value[index].id}`)
     trashList.value.splice(index, 1)
-    localStorage.setItem('trashEmployees', JSON.stringify(trashList.value))
     alert('Deleted is Done ! ')
   }
 }
 
-const emptyTrash = () => {
+const emptyTrash = async () => {
   if (confirm('Do you want to empty the basket completely?')) {
     trashList.value = []
     localStorage.removeItem('trashEmployees')
@@ -94,10 +90,11 @@ const emptyTrash = () => {
 onMounted(() => {
   loadTrash()
 })
+
 </script>
 
 <style scoped>
 h2 {
   margin-bottom: 20px;
 }
-</style>
+</style>  
