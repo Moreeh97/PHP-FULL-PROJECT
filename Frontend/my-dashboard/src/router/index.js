@@ -12,6 +12,7 @@ import LeavesManagement from '@/views/LeavesManagement.vue'
 
 
 
+
 const routes = [
   
   { path: '/home', name: 'DashboardCard', component: DashboardCard },

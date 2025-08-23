@@ -1,37 +1,68 @@
 import { getData, postData, putData, deleteData, uploadWithProgress } from "./api";
 
-//get all employees
-export const fetchEmployees = async () => {
-  const res = await getData("/employees.php");
-  return res.data; 
+// Fetch all employees
+export async function fetchEmployees() {
+  try {
+    const res = await api.get('/employees'); 
+    return res.data; 
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
+// Add employee
+export async function addEmployeeApi(employeeFormData) {
+  try {
+    const res = await api.post('/employees', employeeFormData);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+// Search employees
+export async function searchEmployeeApi(name) {
+  try {
+    const res = await api.get(`/employees?name=${encodeURIComponent(name)}`);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
+// Update employees
+export async function updateEmployeeApi(id, employeeFormData) {
+  try {
+    const res = await api.put(`/employees/${id}`, employeeFormData);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+// Delete employees
+export async function deleteEmployeeApi(id) {
+  try {
+    const res = await api.delete(`/employees/${id}`);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 };
 
-//add employee
-export const addEmployeeApi = async (employeeFormData) => {
-  const res = await postData("/employees.php", employeeFormData);
+// Upload contract
+export async function uploadContractApi(formData, onProgress) {
+  try {
+    const res = await uploadWithProgress("/upload_contract.php", formData, onProgress);
+    return res.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
   return res.data;
-};
-
-//search employees
-export const searchEmployeeApi = async (name) => {
-  const res = await getData(`/employees.php?name=${encodeURIComponent(name)}`);
-  return res.data;
-};
-
-//update employees
-export const updateEmployeeApi = async (id, employeeFormData) => {
-  const res = await putData(`/employees.php?id=${id}`, employeeFormData);
-  return res.data;
-};
-
-//delete employees
-export const deleteEmployeeApi = async (id) => {
-  const res = await deleteData(`/employees.php?id=${id}`);
-  return res.data;
-};
-
-//upload contract
-export const uploadContractApi = async (formData, onProgress) => {
-  const res = await uploadWithProgress("/upload_contract.php", formData, onProgress);
-  return res.data;
-};
+}
