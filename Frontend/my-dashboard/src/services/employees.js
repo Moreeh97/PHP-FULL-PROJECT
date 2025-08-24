@@ -1,10 +1,17 @@
-import { getData, postData, putData, deleteData, uploadWithProgress } from "./api";
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://php-full-project.local",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 // Fetch all employees
-export async function fetchEmployees() {
+export async function getEmployeesApi() {
   try {
-    const res = await api.get('/employees'); 
-    return res.data; 
+    const res = await api.get('/employees');
+    return res.data;
   } catch (err) {
     console.error(err);
     return [];
@@ -17,7 +24,7 @@ export async function addEmployeeApi(employeeFormData) {
     const res = await api.post('/employees', employeeFormData);
     return res.data;
   } catch (err) {
-    console.error(err);
+    console.error(err); 
     return null;
   }
 }

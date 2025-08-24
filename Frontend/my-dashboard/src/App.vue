@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="flex flex-col md:flex-row min-h-screen relative">
 
     <button
@@ -37,8 +37,27 @@
       <Footer />
     </div>
   </div>
-</template>
+</template> -->
+<template>
+  <div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <Sidebar />
 
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Header -->
+      <Header />
+
+      <!-- Page Content -->
+      <main class="flex-1 overflow-auto p-6">
+        <router-view />
+      </main>
+
+      <!-- Footer -->
+      <Footer />
+    </div>
+  </div>
+</template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -65,3 +84,12 @@ onMounted(() => {
   isMobile.value = window.innerWidth < 768
 })
 </script>
+<style>
+main::-webkit-scrollbar {
+  width: 8px;
+}
+main::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+</style>

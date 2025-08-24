@@ -1,20 +1,18 @@
 <template>
   <div class="flex h-screen">
     <!-- Sidebar Desktop -->
-    <aside class="hidden md:block bg-white shadow-sm fixed top-0 left-0 h-screen w-64 dark:bg-gray-900 dark:text-white">
-      <div class="p-6">
-        <h2 class="font-bold text-lg mb-4">Employees Management</h2>
-        <ul class="space-y-2">
-          <li><router-link to="/home" class="block py-2 px-4 hover:bg-orange-400 rounded">Dashboard</router-link></li>
-          <li><router-link to="/employees" class="block py-2 px-4 hover:bg-orange-400 rounded">Employees</router-link></li>
-          <li><router-link to="/add-employee" class="block py-2 px-4 hover:bg-orange-400 rounded">Add Employee</router-link></li>
-          <li><router-link to="/delete-employee" class="block py-2 px-4 hover:bg-orange-400 rounded">Delete Employee</router-link></li>
-          <li><router-link to="/employee-profile" class="block py-2 px-4 hover:bg-orange-400 rounded">Employee Profile</router-link></li>
-          <li><router-link to="/leave-management" class="block py-2 px-4 hover:bg-orange-400 rounded">Leaves Management</router-link></li>
-          <li><router-link to="/salary-summary" class="block py-2 px-4 hover:bg-orange-400 rounded">Salary Summary</router-link></li>
-          <li><router-link to="/recover-employees" class="block py-2 px-4 hover:bg-orange-400 rounded">Trash</router-link></li>
+    <aside class="w-64 bg-gray-800 text-white flex flex-col">
+      <div class="p-6 text-xl font-bold">My Dashboard</div>
+      <nav class="flex-1">
+        <ul>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/home">Dashboard</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/employees">Employees</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/add-employee">Add Employee</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/salary-summary">Salary Summary</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/leave-management">Leaves</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/recover-employees">Recovery</router-link></li>
         </ul>
-      </div>
+      </nav>
     </aside>
 
     <!-- Mobile Navbar -->

@@ -1,34 +1,25 @@
 import axios from "axios";
 
-// إعداد Axios مع رابط الباك إند
 const api = axios.create({
-  baseURL: "http://localhost/PHP-FULL-PROJECT/Backend/api", // عدل حسب مسار PHP
+  baseURL: "http://php-full-project.local",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// ✅ دالة عامة للحصول على البيانات
-export const getData = (endpoint, params = {}) => {
-  return api.get(endpoint, { params });
-};
+// Generic requests
+export const getData = (endpoint, params = {}) => api.get(endpoint, { params });
+export const postData = (endpoint, data) => api.post(endpoint, data);
+export const putData = (endpoint, data) => api.put(endpoint, data);
+export const deleteData = (endpoint) => api.delete(endpoint);
 
-// ✅ دالة عامة لإرسال بيانات (إضافة / تحديث)
-export const postData = (endpoint, data) => {
-  return api.post(endpoint, data);
-};
+// Employee-specific helpers
+export const getEmployees = () => api.get("/employees");
+export const addEmployee = (employee) => api.post("/employees/create", employee);
+export const updateEmployee = (id, data) => api.put(`/employees/${id}`, data);
+export const deleteEmployee = (id) => api.delete(`/employees/${id}`);
 
-// ✅ دالة عامة للتحديث
-export const putData = (endpoint, data) => {
-  return api.put(endpoint, data);
-};
-
-// ✅ دالة عامة للحذف
-export const deleteData = (endpoint) => {
-  return api.delete(endpoint);
-};
-
-// ✅ رفع الملفات مع Progress
+// File upload with progress
 export const uploadWithProgress = (endpoint, data, onProgress) => {
   return api.post(endpoint, data, {
     headers: {
@@ -44,45 +35,3 @@ export const uploadWithProgress = (endpoint, data, onProgress) => {
 };
 
 export default api;
-
-
-
-// import axios from "axios"
-
-// const apiClient = axios.create({
-//   baseURL: "http://localhost/employee-mgmt/api",
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// })
-
-// export default {
-
-//   //upload file progress
-//   uploadFile(file) {
-//     const formData = new FormData()
-//     formData.append("file", file)
-
-//     return apiClient.post("/upload", formData, {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//       },
-//     })
-//   },
-
-//   addEmployee(employee) {
-//     return apiClient.post("/employees/create", employee)
-//   },
-
-//   getEmployees() {
-//     return apiClient.get("/employees")
-//   },
-
-//   deleteEmployee(id) {
-//     return apiClient.delete(`/employees/${id}`)
-//   },
-
-//   updateEmployee(id, data) {
-//     return apiClient.put(`/employees/${id}`, data)
-//   }
-// }

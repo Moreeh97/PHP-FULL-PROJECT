@@ -1,5 +1,11 @@
-// services/leaves.js
-import api from './api'
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://php-full-project.local",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 /**
  * Fetch all leaves

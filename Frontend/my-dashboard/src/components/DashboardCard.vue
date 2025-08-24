@@ -1,3 +1,4 @@
+
 <template>
   <div class="p-4 sm:p-6 dark:bg-gray-700 dark:text-white min-h-screen">
     <h1 class="text-xl sm:text-2xl font-bold mb-6 text-center sm:text-left">

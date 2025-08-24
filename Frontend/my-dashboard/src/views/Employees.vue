@@ -1,113 +1,60 @@
 <template>
   <div class="p-6">
-    <h2 class="text-2xl font-bold mb-6">Employees Menu</h2>
+    <h2 class="text-2xl font-bold mb-4">Employees List</h2>
 
-    <!-- Employee List -->
-    <div v-if="!viewingDetails" class="overflow-x-auto">
-      <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="border px-4 py-2">ID</th>
-            <th class="border px-4 py-2">Name</th>
-            <th class="border px-4 py-2">Department</th>
-            <th class="border px-4 py-2">Base Salary</th>
-            <th class="border px-4 py-2">Bonus</th>
-            <th class="border px-4 py-2">Deductions</th>
-            <th class="border px-4 py-2">Final Salary</th>
-            <th class="border px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="emp in employees" :key="emp.id" class="hover:bg-gray-50">
-            <td class="border px-4 py-2">{{ emp.id }}</td>
-            <td class="border px-4 py-2">{{ emp.name }}</td>
-            <td class="border px-4 py-2">{{ emp.department }}</td>
-            <td class="border px-4 py-2">{{ emp.base_salary }}</td>
-            <td class="border px-4 py-2">{{ emp.bonus }}</td>
-            <td class="border px-4 py-2">{{ emp.deductions }}</td>
-            <td class="border px-4 py-2 font-medium text-green-600">
-              {{ emp.base_salary + emp.bonus - emp.deductions }}
-            </td>
-            <td class="border px-4 py-2 text-center">
-              <button 
-                @click="showDetails(emp)" 
-                class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded"
-              >
-                View Details
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <table v-if="employees.length" class="min-w-full border border-gray-300 rounded-lg overflow-hidden">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 border-b">ID</th>
+          <th class="px-4 py-2 border-b">Name</th>
+          <th class="px-4 py-2 border-b">Department</th>
+          <th class="px-4 py-2 border-b">Phone</th>
+          <th class="px-4 py-2 border-b">Base Salary</th>
+          <th class="px-4 py-2 border-b">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="emp in employees" :key="emp.id" class="hover:bg-gray-50">
+          <td class="px-4 py-2 border-b">{{ emp.id }}</td>
+          <td class="px-4 py-2 border-b">{{ emp.name }}</td>
+          <td class="px-4 py-2 border-b">{{ emp.department }}</td>
+          <td class="px-4 py-2 border-b">{{ emp.phone_number }}</td>
+          <td class="px-4 py-2 border-b">{{ emp.base_salary }}</td>
+          <td class="px-4 py-2 border-b">
+            <button 
+              @click="viewEmployee(emp)" 
+              class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded">
+              View Details
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-      <div v-if="employees.length === 0" class="mt-6 text-center text-gray-500">
-        No employees.
-      </div>
-    </div>
+    <div v-else class="text-gray-500">Loading employees...</div>
 
-    <!-- Employee Details -->
-    <div v-else class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-      <h3 class="text-xl font-semibold mb-6">Employee Details</h3>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block mb-1">Name:</label>
-          <input v-model="selectedEmployee.name" type="text" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Email:</label>
-          <input v-model="selectedEmployee.email" type="email" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Phone Number:</label>
-          <input v-model="selectedEmployee.phone_number" type="text" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Education:</label>
-          <input v-model="selectedEmployee.education" type="text" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Department:</label>
-          <input v-model="selectedEmployee.department" type="text" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Base Salary:</label>
-          <input v-model.number="selectedEmployee.base_salary" type="number" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Bonus:</label>
-          <input v-model.number="selectedEmployee.bonus" type="number" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div>
-          <label class="block mb-1">Deductions:</label>
-          <input v-model.number="selectedEmployee.deductions" type="number" class="w-full border px-3 py-2 rounded" />
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="block mb-1">Note:</label>
-          <textarea v-model="selectedEmployee.note" class="w-full border px-3 py-2 rounded"></textarea>
-        </div>
-
-        <div class="sm:col-span-2">
-          <label class="block mb-1">Contract:</label>
-          <input type="file" @change="handleContractUpload" class="w-full border px-3 py-2 rounded" />
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="mt-6 flex justify-between">
-        <button @click="updateEmployee" class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded">
-          Update
-        </button>
-        <button @click="backToList" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
-          Back
+    <!-- Employee Details Modal -->
+    <div v-if="selectedEmployee" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2 p-6 relative">
+        <h3 class="text-xl font-bold mb-4">Employee Details</h3>
+        <ul class="space-y-2">
+          <li><strong>ID:</strong> {{ selectedEmployee.id }}</li>
+          <li><strong>Name:</strong> {{ selectedEmployee.name }}</li>
+          <li><strong>Email:</strong> {{ selectedEmployee.email }}</li>
+          <li><strong>Phone:</strong> {{ selectedEmployee.phone_number }}</li>
+          <li><strong>Department:</strong> {{ selectedEmployee.department }}</li>
+          <li><strong>Education:</strong> {{ selectedEmployee.education }}</li>
+          <li><strong>Base Salary:</strong> {{ selectedEmployee.base_salary }}</li>
+          <li><strong>Bonus:</strong> {{ selectedEmployee.bonus }}</li>
+          <li><strong>Deductions:</strong> {{ selectedEmployee.deductions }}</li>
+          <li><strong>Note:</strong> {{ selectedEmployee.note }}</li>
+          <li><strong>Contract:</strong> {{ selectedEmployee.contract }}</li>
+          <li><strong>Created At:</strong> {{ selectedEmployee.created_at }}</li>
+        </ul>
+        <button 
+          @click="selectedEmployee = null" 
+          class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+          ✖
         </button>
       </div>
     </div>
@@ -115,102 +62,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { fetchEmployees, updateEmployeeApi, uploadContractApi } from "@/services/employees";
-
-const employees = ref([]);
-const selectedEmployee = ref(null);
-const viewingDetails = ref(false);
-const contractFile = ref(null);
-
-// Load all employees
-async function load() {
-  try {
-    const data = await fetchEmployees();
-    employees.value = data;
-  } catch (e) {
-    console.error("Error fetching employees:", e);
-  }
-}
-
-// Show employee details
-function showDetails(emp) {
-  selectedEmployee.value = { ...emp };
-  viewingDetails.value = true;
-}
-
-// Back to employee list
-function backToList() {
-  selectedEmployee.value = null;
-  viewingDetails.value = false;
-}
-
-// Update employee
-async function updateEmployee() {
-  try {
-    await updateEmployeeApi(selectedEmployee.value.id, selectedEmployee.value);
-    alert("Employee updated successfully!");
-    backToList();
-    load();
-  } catch (e) {
-    alert("Error updating employee: " + e.message);
-  }
-}
-
-// Handle contract upload
-function handleContractUpload(event) {
-  contractFile.value = event.target.files[0];
-  if (!contractFile.value) return;
-
-  const formData = new FormData();
-  formData.append("contract", contractFile.value);
-  formData.append("employee_id", selectedEmployee.value.id);
-
-  uploadContractApi(formData, (progress) => {
-    console.log("Upload progress:", progress + "%");
-  })
-    .then(() => {
-      alert("Contract uploaded successfully!");
-    })
-    .catch((err) => {
-      alert("Error uploading contract: " + err.message);
-    });
-}
-
-onMounted(load);
-</script>
-
-
-
-<!-- <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 const employees = ref([])
-const selectedEmployee = ref({})
-const viewingDetails = ref(false)
-let currentIndex = ref(-1)
+const selectedEmployee = ref(null)
 
-onMounted(() => {
-  const stored = JSON.parse(localStorage.getItem('employees') || '[]')
-  employees.value = stored
-})
-
-const showDetails = (emp, index) => {
-  selectedEmployee.value = { ...emp }
-  currentIndex.value = index
-  viewingDetails.value = true
-}
-
-const updateEmployee = () => {
-  if (currentIndex.value !== -1) {
-    employees.value[currentIndex.value] = { ...selectedEmployee.value }
-    localStorage.setItem('employees', JSON.stringify(employees.value))
-    alert('data updated !')
-    viewingDetails.value = false
+async function loadEmployees() {
+  try {
+    const res = await axios.get('http://php-full-project.local/api/employees')
+    employees.value = res.data
+  } catch (err) {
+    console.error('Failed to load employees', err)
+    alert('Failed to load employees.')
   }
 }
 
-const backToList = () => {
-  viewingDetails.value = false
+function viewEmployee(emp) {
+  selectedEmployee.value = emp
 }
-</script> -->
+
+onMounted(loadEmployees)
+</script>
+
+<style scoped>
+</style>
+
