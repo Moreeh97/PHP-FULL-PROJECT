@@ -1,4 +1,3 @@
-
 <template>
   <div class="p-4 sm:p-6 dark:bg-gray-700 dark:text-white min-h-screen">
     <h1 class="text-xl sm:text-2xl font-bold mb-6 text-center sm:text-left">
@@ -50,7 +49,7 @@
           >
             <td class="p-3">{{ emp.name }}</td>
             <td class="p-3">{{ emp.department }}</td>
-            <td class="p-3">{{ emp.baseSalary }}</td>
+            <td class="p-3">{{ emp.base_salary }}</td>
             <td class="p-3 flex flex-wrap gap-2">
               <button @click="openDetails(emp)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition">Show</button>
               <button @click="openEdit(emp)" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition">Edit</button>
@@ -66,8 +65,15 @@
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
         <h2 class="text-lg font-bold mb-4">Add employee</h2>
         <input v-model="newEmployee.name" placeholder="Name" class="w-full p-2 border rounded mb-2" />
+        <input v-model="newEmployee.email" placeholder="Email" type="email" class="w-full p-2 border rounded mb-2" />
+        <input v-model="newEmployee.phone_number" placeholder="Phone Number" class="w-full p-2 border rounded mb-2" />
+        <input v-model="newEmployee.education" placeholder="Education" class="w-full p-2 border rounded mb-2" />
         <input v-model="newEmployee.department" placeholder="Department" class="w-full p-2 border rounded mb-2" />
-        <input v-model="newEmployee.baseSalary" placeholder="Salary" type="number" class="w-full p-2 border rounded mb-4" />
+        <input v-model="newEmployee.base_salary" placeholder="Salary" type="number" class="w-full p-2 border rounded mb-4" />
+        <input v-model="newEmployee.bonus" placeholder="Bonus" type="number" class="w-full p-2 border rounded mb-4" />
+        <input v-model="newEmployee.deductions" placeholder="Deductions" type="number" class="w-full p-2 border rounded mb-4" />
+        <input v-model="newEmployee.note" placeholder="Note" class="w-full p-2 border rounded mb-4" />
+        <input v-model="newEmployee.date" placeholder="Date" type="date" class="w-full p-2 border rounded mb-4" />
         <div class="flex justify-end gap-2">
           <button @click="addEmployee" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Save</button>
           <button @click="showAddModal = false" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancel</button>
@@ -117,69 +123,152 @@
 </template>
 
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
 
+<script setup>
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+// Data
 const employees = ref([])
+const maxSalary = ref(0)
+const minSalary = ref(0)
+const totalSalary = ref(0)
+
+// Modals
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDetailsModal = ref(false)
 const showDeleteModal = ref(false)
 const showDeletedModal = ref(false)
 
-const newEmployee = ref({ name: '', department: '', baseSalary: 0 })
-const editEmployee = ref({})
+// Employee Models
+const newEmployee = ref({
+  name: '',
+  email: '',
+  phone_number: '',
+  education: '',
+  department: '',
+  base_salary: '',
+  bonus: '',
+  deductions: '',
+  note: '',
+  date: '',
+  contract: null
+})
+const editEmployee = ref({
+  id: null,
+  name: '',
+  phone_number: '',
+  education: '',
+  base_salary: 0
+})
 const detailsEmployee = ref({})
 const deleteTarget = ref({})
 
-// summary
-const totalSalary = computed(() => employees.value.reduce((sum, e) => sum + Number(e.baseSalary), 0))
-const maxSalary = computed(() => Math.max(...employees.value.map(e => Number(e.baseSalary))))
-const minSalary = computed(() => Math.min(...employees.value.map(e => Number(e.baseSalary))))
-
-onMounted(() => {
-  const saved = JSON.parse(localStorage.getItem('employees') || '[]')
-  employees.value = saved
-})
-
-// add
-const addEmployee = () => {
-  employees.value.push({ ...newEmployee.value })
-  localStorage.setItem('employees', JSON.stringify(employees.value))
-  showAddModal.value = false
-  newEmployee.value = { name: '', department: '', baseSalary: 0 }
+// Load employees
+async function loadEmployees() {
+  try {
+    const res = await axios.get('http://php-full-project.local/api/employees')
+    employees.value = res.data
+    calculateSalaries()
+  } catch (err) {
+    console.error('Failed to load employees', err)
+  }
 }
 
-// edit
-const openEdit = (emp) => {
-  editEmployee.value = { ...emp }
+// Calculate summaries
+function calculateSalaries() {
+  if (employees.value.length === 0) {
+    maxSalary.value = minSalary.value = totalSalary.value = 0
+    return
+  }
+  const salaries = employees.value.map(emp => parseFloat(emp.base_salary))
+  maxSalary.value = Math.max(...salaries)
+  minSalary.value = Math.min(...salaries)
+  totalSalary.value = salaries.reduce((a, b) => a + b, 0)
+}
+
+// Add employee
+async function addEmployee() {
+  try {
+    const formData = new FormData()
+    for (let key in newEmployee.value) {
+      formData.append(key, newEmployee.value[key])
+    }
+
+    const res = await axios.post('http://php-full-project.local/api/employees', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    if (res.data.success) {
+      employees.value.push(res.data.employee)
+      success.value = true
+      calculateSalaries()
+      showAddModal.value = false
+      newEmployee.value = { name: '', email: '', phone_number: '', education: '', department: '', base_salary: '', bonus: '', deductions: '', note: '', date: '', contract: null }
+    } else {
+      alert('Error saving employee')
+    }
+  } catch (err) {
+    console.error('Error adding employee', err)
+  }
+}
+
+// Open edit modal
+function openEdit(emp) {
+  editEmployee.value = { ...emp, base_salary: parseFloat(emp.base_salary) }
   showEditModal.value = true
 }
-const saveEdit = () => {
-  const index = employees.value.findIndex(e => e.name === editEmployee.value.name)
-  if (index !== -1) {
-    employees.value[index] = { ...editEmployee.value }
-    localStorage.setItem('employees', JSON.stringify(employees.value))
+
+// Save edit
+async function saveEdit() {
+  try {
+    const res = await axios.put(`http://php-full-project.local/api/employees/${editEmployee.value.id}`, editEmployee.value)
+    if (res.data.success) {
+      const index = employees.value.findIndex(e => e.id === editEmployee.value.id)
+      if (index !== -1) employees.value[index] = { ...editEmployee.value }
+      calculateSalaries()
+      showEditModal.value = false
+    } else {
+      alert('Error updating employee')
+    }
+  } catch (err) {
+    console.error('Error updating employee', err)
   }
-  showEditModal.value = false
 }
 
-// detailes
-const openDetails = (emp) => {
+// Open details modal
+function openDetails(emp) {
   detailsEmployee.value = { ...emp }
   showDetailsModal.value = true
 }
 
-// delete
-const confirmDelete = (emp) => {
+// Confirm delete
+function confirmDelete(emp) {
   deleteTarget.value = emp
   showDeleteModal.value = true
 }
-const deleteEmployee = () => {
-  employees.value = employees.value.filter(e => e !== deleteTarget.value)
-  localStorage.setItem('employees', JSON.stringify(employees.value))
-  showDeleteModal.value = false
+
+// Delete employee
+async function deleteEmployee() {
+  try {
+    const res = await axios.delete(`http://php-full-project.local/api/employees/${deleteTarget.value.id}`)
+    if (res.data.success) {
+      employees.value = employees.value.filter(emp => emp.id !== deleteTarget.value.id)
+      calculateSalaries()
+      showDeleteModal.value = false
+    } else {
+      alert('Error deleting employee')
+    }
+  } catch (err) {
+    console.error('Error deleting employee', err)
+  }
 }
+
+// Initial load
+onMounted(loadEmployees)
+
+
 </script>
 
 <style scoped>
