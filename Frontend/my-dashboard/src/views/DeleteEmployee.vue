@@ -27,12 +27,13 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-gray-700">
         <p><strong>Name:</strong> {{ employee.name }}</p>
         <p><strong>Education:</strong> {{ employee.education }}</p>
-        <p><strong>Phone:</strong> {{ employee.phoneNumber }}</p>
+        <p><strong>Phone:</strong> {{ employee.phone_number }}</p>
         <p><strong>Email:</strong> {{ employee.email }}</p>
         <p><strong>Department:</strong> {{ employee.department }}</p>
-        <p><strong>Base Salary:</strong> {{ employee.baseSalary }}</p>
+        <p><strong>Base Salary:</strong> {{ employee.base_salary }}</p>
         <p><strong>Bonus:</strong> {{ employee.bonus }}</p>
         <p><strong>Deductions:</strong> {{ employee.deductions }}</p>
+        <p><strong>Contract:</strong> {{ employee.contract }}</p>
       </div>
 
       <button 
@@ -53,7 +54,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { searchEmployeeApi, deleteEmployeeApi } from '@/services/employees'
+import axios from 'axios'
 
 const searchName = ref('')
 const employee = ref(null)
@@ -61,7 +62,7 @@ const searched = ref(false)
 
 const searchEmployee = async () => {
   try {
-    const data = await searchEmployeeApi(searchName.value)
+    const { data } = await axios.get(`http://php-full-project.local/api/employees?name=${searchName.value}`)
     employee.value = data.length ? data[0] : null
     searched.value = true
   } catch (err) {
@@ -73,7 +74,7 @@ const searchEmployee = async () => {
 const deleteEmployee = async () => {
   if (employee.value) {
     try {
-      await deleteEmployeeApi(employee.value.id)
+      await axios.delete(`http://php-full-project.local/api/employees/${employee.value.id}`)
       employee.value = null
       searchName.value = ''
       searched.value = false

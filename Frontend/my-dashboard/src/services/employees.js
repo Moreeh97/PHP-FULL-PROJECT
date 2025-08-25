@@ -43,7 +43,7 @@ export async function searchEmployeeApi(name) {
 // Update employees
 export async function updateEmployeeApi(id, employeeFormData) {
   try {
-    const res = await api.put(`/employees/${id}`, employeeFormData);
+    const res = await api.post(`/employees/${id}`, employeeFormData);
     return res.data;
   } catch (err) {
     console.error(err);

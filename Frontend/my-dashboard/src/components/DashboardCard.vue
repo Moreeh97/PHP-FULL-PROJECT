@@ -38,6 +38,7 @@
             <th class="p-3">Name</th>
             <th class="p-3">Department</th>
             <th class="p-3">Salary</th>
+            <th class="p-3">phone_number</th>
             <th class="p-3">Options</th>
           </tr>
         </thead>
@@ -50,6 +51,7 @@
             <td class="p-3">{{ emp.name }}</td>
             <td class="p-3">{{ emp.department }}</td>
             <td class="p-3">{{ emp.base_salary }}</td>
+            <td class="p-3">{{ emp.phone_number }}</td>
             <td class="p-3 flex flex-wrap gap-2">
               <button @click="openDetails(emp)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition">Show</button>
               <button @click="openEdit(emp)" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition">Edit</button>
@@ -86,8 +88,12 @@
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
         <h2 class="text-lg font-bold mb-4">Edit employee</h2>
         <input v-model="editEmployee.name" placeholder="Name" class="w-full p-2 border rounded mb-2" />
+        <input v-model="editEmployee.education" placeholder="Education" class="w-full p-2 border rounded mb-2" />
         <input v-model="editEmployee.department" placeholder="Department" class="w-full p-2 border rounded mb-2" />
-        <input v-model="editEmployee.baseSalary" type="number" placeholder="Salary" class="w-full p-2 border rounded mb-4" />
+        <input v-model="editEmployee.base_salary" type="number" placeholder="Salary" class="w-full p-2 border rounded mb-4" />
+        <input v-model="editEmployee.phone_number" placeholder="Phone Number" class="w-full p-2 border rounded mb-2" />
+        <input v-model="editEmployee.email" placeholder="Email" type="email" class="w-full p-2 border rounded mb-2" />
+        <input v-model="editEmployee.date" type="date" class="w-full p-2 border rounded mb-4" />
         <div class="flex justify-end gap-2">
           <button @click="saveEdit" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded">Update</button>
           <button @click="showEditModal = false" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancel</button>
@@ -101,7 +107,12 @@
         <h2 class="text-lg font-bold mb-4">Employee Details</h2>
         <p class="mb-1"><strong>Name:</strong> {{ detailsEmployee.name }}</p>
         <p class="mb-1"><strong>Department:</strong> {{ detailsEmployee.department }}</p>
-        <p class="mb-4"><strong>Basic salary:</strong> {{ detailsEmployee.baseSalary }}</p>
+        <p class="mb-4"><strong>Basic salary:</strong> {{ detailsEmployee.base_salary }}</p>
+        <p class="mb-1"><strong>Email:</strong> {{ detailsEmployee.email }}</p>
+        <p class="mb-1"><strong>Phone Number:</strong> {{ detailsEmployee.phone_number }}</p>
+        <p class="mb-1"><strong>Education:</strong> {{ detailsEmployee.education }}</p>
+        <p class="mb-1"><strong>Date:</strong> {{ detailsEmployee.date }}</p>
+        <p class="mb-1"><strong>Contract:</strong> {{ detailsEmployee.contract }}</p>
         <div class="flex justify-end">
           <button @click="showDetailsModal = false" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">Back</button>
         </div>
@@ -139,7 +150,6 @@ const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDetailsModal = ref(false)
 const showDeleteModal = ref(false)
-const showDeletedModal = ref(false)
 
 // Employee Models
 const newEmployee = ref({
@@ -155,13 +165,7 @@ const newEmployee = ref({
   date: '',
   contract: null
 })
-const editEmployee = ref({
-  id: null,
-  name: '',
-  phone_number: '',
-  education: '',
-  base_salary: 0
-})
+const editEmployee = ref({})
 const detailsEmployee = ref({})
 const deleteTarget = ref({})
 
@@ -191,21 +195,14 @@ function calculateSalaries() {
 // Add employee
 async function addEmployee() {
   try {
-    const formData = new FormData()
-    for (let key in newEmployee.value) {
-      formData.append(key, newEmployee.value[key])
-    }
-
-    const res = await axios.post('http://php-full-project.local/api/employees', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    const res = await axios.post('http://php-full-project.local/api/employees', newEmployee.value)
 
     if (res.data.success) {
       employees.value.push(res.data.employee)
-      success.value = true
       calculateSalaries()
       showAddModal.value = false
-      newEmployee.value = { name: '', email: '', phone_number: '', education: '', department: '', base_salary: '', bonus: '', deductions: '', note: '', date: '', contract: null }
+      // reset form
+      Object.keys(newEmployee.value).forEach(k => newEmployee.value[k] = '')
     } else {
       alert('Error saving employee')
     }
@@ -216,18 +213,21 @@ async function addEmployee() {
 
 // Open edit modal
 function openEdit(emp) {
-  editEmployee.value = { ...emp, base_salary: parseFloat(emp.base_salary) }
+  editEmployee.value = { ...emp }
   showEditModal.value = true
 }
 
 // Save edit
 async function saveEdit() {
   try {
-    const res = await axios.put(`http://php-full-project.local/api/employees/${editEmployee.value.id}`, editEmployee.value)
+    const res = await axios.post(`http://php-full-project.local/api/employees/${editEmployee.value.id}`, editEmployee.value)
+
     if (res.data.success) {
       const index = employees.value.findIndex(e => e.id === editEmployee.value.id)
-      if (index !== -1) employees.value[index] = { ...editEmployee.value }
-      calculateSalaries()
+      if (index !== -1) {
+        employees.value[index] = { ...editEmployee.value }
+        calculateSalaries()
+      }
       showEditModal.value = false
     } else {
       alert('Error updating employee')
@@ -267,9 +267,8 @@ async function deleteEmployee() {
 
 // Initial load
 onMounted(loadEmployees)
-
-
 </script>
+
 
 <style scoped>
 .modal {
