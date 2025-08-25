@@ -54,13 +54,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { fetchTrash, restoreEmployee, deletePermanently, emptyTrash } from '@/services/trash'
+import axios from 'axios'
 
 const trashList = ref([])
 
 const loadTrash = async () => {
   try {
-    trashList.value = await fetchTrash()
+    const response = await axios.get('/api/trash')
+    trashList.value = response.data
   } catch (err) {
     console.error('Error loading trash:', err)
   }

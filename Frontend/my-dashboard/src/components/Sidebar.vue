@@ -8,6 +8,8 @@
           <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/home">Dashboard</router-link></li>
           <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/employees">Employees</router-link></li>
           <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/add-employee">Add Employee</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/delete-employee">Delete Employee</router-link></li>
+          <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/employee-profile">Employee Profile</router-link></li>
           <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/salary-summary">Salary Summary</router-link></li>
           <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/leave-management">Leaves</router-link></li>
           <li class="px-6 py-2 hover:bg-gray-700"><router-link to="/recover-employees">Recovery</router-link></li>
@@ -49,6 +51,8 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 const mobileMenuOpen = ref(false);
 

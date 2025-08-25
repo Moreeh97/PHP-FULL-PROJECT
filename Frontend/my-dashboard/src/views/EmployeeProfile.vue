@@ -47,8 +47,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { searchEmployeeApi } from '@/services/employees'
-
+import axios from 'axios'
 const searchName = ref('')
 const employee = ref(null)
 const searched = ref(false)

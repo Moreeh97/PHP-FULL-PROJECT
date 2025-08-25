@@ -195,19 +195,27 @@ function calculateSalaries() {
 // Add employee
 async function addEmployee() {
   try {
-    const res = await axios.post('http://php-full-project.local/api/employees', newEmployee.value)
+    const formData = new FormData()
+    for (let key in newEmployee.value) {
+      formData.append(key, newEmployee.value[key])
+    }
+
+    const res = await axios.post('http://php-full-project.local/api/employees', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
 
     if (res.data.success) {
-      employees.value.push(res.data.employee)
-      calculateSalaries()
-      showAddModal.value = false
-      // reset form
-      Object.keys(newEmployee.value).forEach(k => newEmployee.value[k] = '')
+      message.value = "Employee saved successfully!"
+      success.value = true
+      newEmployee.value = { name: '', email: '', phone_number: '', education: '', department: '', base_salary: '', bonus: '', deductions: '', note: '', date: '', contract: null }
     } else {
-      alert('Error saving employee')
+      message.value = "Error saving employee"
+      success.value = false
     }
   } catch (err) {
-    console.error('Error adding employee', err)
+    console.error(err.response?.data || err.message)
+    message.value = "Server error: " + (err.response?.data || err.message)
+    success.value = false
   }
 }
 

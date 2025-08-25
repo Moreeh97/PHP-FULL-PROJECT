@@ -31,40 +31,45 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/services/api'
+import axios from 'axios';
 
-const employees = ref([])
+const employees = ref([]);
 
-onMounted(async () => {
+const fetchEmployees = async () => {
   try {
-    employees.value = await api.get('/employees')
-  } catch (err) {
-    console.error('Error fetching employees:', err)
+    const response = await axios.get('http://php-full-project.local/api/employees');
+    employees.value = response.data;
+  } catch (error) {
+    console.error("Error fetching employees:", error);
   }
-})
+};
 
-// Computed properties for dynamic calculation
-const totalBaseSalary = computed(() => 
-  employees.value.reduce((sum, emp) => sum + Number(emp.baseSalary || 0), 0)
-)
+const totalBaseSalary = computed(() => {
+  return employees.value.reduce((sum, emp) => sum + (parseFloat(emp.base_salary) || 0), 0).toFixed(2);
+});
 
-const totalBonus = computed(() => 
-  employees.value.reduce((sum, emp) => sum + Number(emp.bonus || 0), 0)
-)
+const totalBonus = computed(() => {
+  return employees.value.reduce((sum, emp) => sum + (parseFloat(emp.bonus) || 0), 0).toFixed(2);
+});
 
-const totalDeductions = computed(() => 
-  employees.value.reduce((sum, emp) => sum + Number(emp.deductions || 0), 0)
-)
+const totalDeductions = computed(() => {
+  return employees.value.reduce((sum, emp) => sum + (parseFloat(emp.deductions) || 0), 0).toFixed(2);
+});
 
-const totalNetSalary = computed(() =>
-  employees.value.reduce((sum, emp) => {
-    const base = Number(emp.baseSalary || 0)
-    const bonus = Number(emp.bonus || 0)
-    const deductions = Number(emp.deductions || 0)
-    return sum + (base + bonus - deductions)
-  }, 0)
-)
+const totalNetSalary = computed(() => {
+  return employees.value.reduce((sum, emp) => {
+    const base = parseFloat(emp.base_salary) || 0;
+    const bonus = parseFloat(emp.bonus) || 0;
+    const deductions = parseFloat(emp.deductions) || 0;
+    return sum + (base + bonus - deductions);
+  }, 0).toFixed(2);
+});
+
+onMounted(fetchEmployees);
+
+
 </script>
+
 
 <style scoped>
 h2 {

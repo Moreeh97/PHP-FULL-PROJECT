@@ -90,8 +90,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/services/api'
-
+import axios from 'axios'
 const employees = ref([])
 const leaves = ref([])
 const leaveRequest = ref({
