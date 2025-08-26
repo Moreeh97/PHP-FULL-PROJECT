@@ -53,43 +53,52 @@
 
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+import { ref } from 'vue'
+import axios from 'axios'
 
-const searchName = ref('');
-const employee = ref(null);
-const searched = ref(false);
+const searchName = ref('')
+const employee = ref(null)
+const searched = ref(false)
 
 const searchEmployee = async () => {
   try {
-    const { data } = await axios.get('http://php-full-project.local/api/employees');
-    const found = data.find(emp => emp.name.toLowerCase() === searchName.value.toLowerCase());
-    employee.value = found || null;
-    searched.value = true;
+    const { data } = await axios.get(`http://php-full-project.local/api/employees?name=${searchName.value}`)
+    employee.value = data.length ? data[0] : null
+    searched.value = true
   } catch (err) {
-    console.error('Search failed:', err);
-    alert('Error searching employee');
+    console.error('Search failed:', err)
+    alert('Error searching employee')
   }
-};
-
+}
 
 const deleteEmployee = async () => {
   if (employee.value) {
     try {
-      await axios.post('http://php-full-project.local/api/employees/delete', {
-          id: employee.value.id
-        });
-      employee.value = null;
-      searchName.value = '';
-      searched.value = false;
-      alert('The employee moved to trash');
+      const formData = new FormData();
+      formData.append('id', employee.value.id);
+
+      const { data } = await axios.post(
+        'http://php-full-project.local/api/employees/delete',
+        formData
+      );
+      if (data.success) {
+        employee.value = null;
+        searchName.value = '';
+        searched.value = false;
+        alert('The employee moved to trash');
+      } else {
+        alert(data.error || 'Failed to delete employee');
+      }
     } catch (err) {
-      console.error('Delete failed:', err);
+      console.error('Delete failed:', err.response?.data || err);
       alert('Error while deleting employee');
     }
   }
 };
+
 </script>
+
+
 
 
 <style scoped>
